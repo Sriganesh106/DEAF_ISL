@@ -1,0 +1,188 @@
+// Deaf Interactive Learning Platform - Database Schema
+// This schema supports users, lessons, AR experiences, QR codes, and progress tracking
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// User model - stores student and teacher information
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String
+  avatar        String?
+  role          String   @default("student") // student, teacher, admin
+  preferences   String?  // JSON string for accessibility preferences
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  progress      LearningProgress[]
+  quizResults   QuizResult[]
+  achievements  UserAchievement[]
+}
+
+// Category for organizing lessons
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  icon        String?  // Icon name for display
+  color       String?  // Theme color
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  lessons     Lesson[]
+}
+
+// Lesson model - main learning content
+model Lesson {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  content     String?  // JSON string for rich content
+  categoryId  String?
+  difficulty  String   @default("beginner") // beginner, intermediate, advanced
+  duration    Int      @default(10) // in minutes
+  thumbnail   String?
+  videoUrl    String?
+  hasAR       Boolean  @default(false)
+  hasQuiz     Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  category    Category?  @relation(fields: [categoryId], references: [id])
+  qrCode      QRCode?
+  quiz        Quiz?
+  progress    LearningProgress[]
+}
+
+// QR Code for AR experiences
+model QRCode {
+  id          String   @id @default(cuid())
+  code        String   @unique // Unique QR code identifier
+  lessonId    String   @unique
+  targetImage String?  // AR target image URL
+  arAssets    String?  // JSON string for AR asset URLs
+  scanCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  lesson      Lesson    @relation(fields: [lessonId], references: [id])
+}
+
+// Learning Progress tracking
+model LearningProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  lessonId    String
+  status      String   @default("not_started") // not_started, in_progress, completed
+  progress    Int      @default(0) // 0-100 percentage
+  timeSpent   Int      @default(0) // in seconds
+  lastAccessed DateTime @default(now())
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  user        User      @relation(fields: [userId], references: [id])
+  lesson      Lesson    @relation(fields: [lessonId], references: [id])
+  
+  @@unique([userId, lessonId])
+}
+
+// Quiz for lessons
+model Quiz {
+  id          String   @id @default(cuid())
+  lessonId    String   @unique
+  questions   String   // JSON string for questions array
+  passingScore Int     @default(70)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  lesson      Lesson      @relation(fields: [lessonId], references: [id])
+  results     QuizResult[]
+}
+
+// Quiz Results
+model QuizResult {
+  id          String   @id @default(cuid())
+  userId      String
+  quizId      String
+  score       Int
+  answers     String   // JSON string for user answers
+  passed      Boolean  @default(false)
+  completedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  user        User      @relation(fields: [userId], references: [id])
+  quiz        Quiz      @relation(fields: [quizId], references: [id])
+}
+
+// Achievements for gamification
+model Achievement {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  icon        String?
+  type        String   // lesson, quiz, streak, special
+  requirement String   // JSON string for unlock requirements
+  points      Int      @default(10)
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  userAchievements UserAchievement[]
+}
+
+// User Achievements (unlocked achievements)
+model UserAchievement {
+  id            String   @id @default(cuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime @default(now())
+  
+  // Relations
+  user          User         @relation(fields: [userId], references: [id])
+  achievement   Achievement  @relation(fields: [achievementId], references: [id])
+  
+  @@unique([userId, achievementId])
+}
+
+// Sign Language vocabulary
+model SignVocabulary {
+  id          String   @id @default(cuid())
+  letter      String   @unique // A-Z for ISL alphabet
+  word        String?  // For word signs
+  description String
+  imageUrl    String?  // Static image of the sign
+  videoUrl    String?  // Video demonstration
+  category    String   @default("alphabet") // alphabet, number, word, phrase
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// AR Scene configurations
+model ARScene {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  sceneType     String   // solar_system, human_body, chemical_reaction, etc.
+  assets        String   // JSON string for 3D model URLs and configurations
+  interactions  String?  // JSON string for interactive elements
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

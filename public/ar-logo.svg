@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" fill="none">
+  <!-- ISL AR Logo - Phone with Cube and Text - WIREFRAME CUBE -->
+  <g stroke="#FFFFFF" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    
+    <!-- Phone (Horizontal) -->
+    <rect x="50" y="80" width="200" height="100" rx="20" />
+    <!-- Phone notch/button details -->
+    <path d="M65 100 v60" stroke-width="8" /> <!-- Left detail -->
+    <path d="M235 130 v0" stroke-width="12" /> <!-- Right camera dot -->
+
+    <!-- 3D Cube (Popping out) - WIREFRAME (No Fill) -->
+    <g transform="translate(150, 80)">
+      <!-- Cube Outlines Only -->
+      <path d="M0 -40 L35 -20 L0 0 L-35 -20 Z" stroke="#FFFFFF"/>
+      <path d="M-35 -20 L-35 25 L0 45 L0 0" stroke="#FFFFFF"/>
+      <path d="M35 -20 L35 25 L0 45 L0 0" stroke="#FFFFFF"/>
+      <!-- Inner edges for wireframe look -->
+      <path d="M0 0 L0 45" stroke="#FFFFFF"/>
+    </g>
+
+    <!-- ISL AR Text -->
+    <text x="150" y="235" font-family="Arial, sans-serif" font-size="45" font-weight="bold" fill="#FFFFFF" stroke="none" text-anchor="middle" letter-spacing="2">ISL AR</text>
+
+    <!-- Diamond/Platform Shape below text -->
+    <path d="M30 220 L150 290 L270 220" /> 
+    
+  </g>
+</svg>
